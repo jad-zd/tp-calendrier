@@ -96,7 +96,16 @@ Data* get_data(char* line) {
 
 //La fonction _add_data_  retourne 0 si l'opération s'est bien déroulé
 //sinon -1
-void add_data(Data* data) {
+int add_data(Data* data) {
+  FILE* f; // déclaration d'un flux
+  f = fopen(DATA, "a"); // ouverture du fichier DATA en mode append
+  if ( f == NULL) return -1; // gestion de l'erreur si on a pas de droits d'écriture
+  char* l = malloc(LINE_SIZE); // initialisation d'une chaîne de caractère de taille LINE_SIZE dans heap
+  data_format(l, data); // formatage de la chaîne de caractère (fonction fournie plus haut)
+  fprintf(f, "%s", l); // écriture de la ligne dans le fichier
+  if (fclose(f) == EOF) return -1; // gestion de l'erreur
+  free(l); // libération de la mémoire
+  return 0; // retourne 0 si tout s'est bien passé
 }
 
 //Enlève la donnée _data_ de la base de donnée
@@ -108,5 +117,17 @@ char* see_all(char* answer) {
 }
 
 int main(int argc, char** argv) {
+  // test add_data(Data* data)
+  Data* data = malloc(sizeof(Data));
+  data->name ="toto";
+  data->activity = "jouer";
+  data->day = MON;
+  data->hour = 14;
+  int res = add_data(data);
+  if (res != 0) {
+    free(data);
+    return res;
+  }
+  free(data);
   return 0;
 }
