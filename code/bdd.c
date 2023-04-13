@@ -168,25 +168,27 @@ int see_all(){
 }
 
 int main(int argc, char** argv) {
-  // test add_data(Data* data)
   Data* data = malloc(sizeof(Data));
-  data->name ="toto";
-  data->activity = "jouer";
-  data->day = MON;
-  data->hour = 14;
-  int res = add_data(data);
-  if (res != 0) {
-    free(data);
-    return res;
+  char* msg = "\nPlease give correct arguments:\n\tSEE\n\tADD|DEL <name> <activity> <day> <hour>\n\nExample:\n\tDEL Lancelot padel lundi 18\n\n";
+  if (argc == 2 && strcmp(argv[1], "SEE") == 0) {
+    see_all();
+  } else if (argc == 6) {
+    data->name = argv[2];
+    data->activity = argv[3];
+    data->day = string_to_day(argv[4]);
+    data->hour = (int)strtol(argv[5], NULL, 10);
+    if(strcmp(argv[1], "ADD") == 0) {
+      add_data(data);
+    } else if (strcmp(argv[1], "DEL") == 0) {
+      delete_data(data);
+    } else {
+      printf("%s", msg);
+      return 1;
+    }
+  } else {
+      printf("%s", msg);
+      return 1;
   }
-  // test delete_data(Data* data)
-  int res2 = delete_data(data);
-  if (res2 != 0) {
-    free(data);
-    return res2;
-  }
-  // test see_all()
-  see_all();
   free(data);
   return 0;
 }
