@@ -99,7 +99,7 @@ Data* get_data(char* line) {
 int add_data(Data* data) {
   FILE* f; // déclaration d'un flux
   f = fopen(DATA, "a"); // ouverture du fichier DATA en mode append
-  if ( f == NULL) return -1; // gestion de l'erreur si on a pas de droits d'écriture
+  if (f == NULL) return -1; // gestion de l'erreur si on a pas de droits d'écriture
   char* l = malloc(LINE_SIZE); // initialisation d'une chaîne de caractère de taille LINE_SIZE dans heap
   data_format(l, data); // formatage de la chaîne de caractère (fonction fournie plus haut)
   fprintf(f, "%s", l); // écriture de la ligne dans le fichier
@@ -109,7 +109,40 @@ int add_data(Data* data) {
 }
 
 //Enlève la donnée _data_ de la base de donnée
-void delete_data(Data* data) {
+// La façon la plus simple de faire cela est de créer un nouveau fichier,
+// y copier tout le contenu de l'ancien fichier sans la/les ligne(s) concernées [data]
+// et finalement renommer ce fichier en data
+int datas_are_equal(Data* data1, Data* data2) {
+  int res = 
+    strcmp(data1->name, data2->name) == 0
+    && strcmp(data1->activity, data2->activity) == 0
+    && data1->day == data2->day
+    && data1->hour == data2->hour
+    ;
+  return res;
+}
+
+int delete_data(Data* data) {
+  FILE* fold;
+  FILE* fnew;
+  char line[LINE_SIZE]; // initialisation d'une chaîne de caractère de taille LINE_size en tant que variable local
+  Data* tmp;
+  int i = 0; // à incrémenter dès qu'on supprime (ne copie pas) une ligne
+  fold = fopen(DATA, "r");
+  if (fold == NULL) return -1; // si on a pas les droits ou le fichier n'existe pas
+  fnew = fopen("data.tmp", "w");
+  if (fold == NULL) return -1;
+  while(fgets(line, LINE_SIZE, fold)) { // tant qu'on peut lire une ligne
+    tmp = get_data(line);
+    if ( ! datas_are_equal(data, tmp)) {
+      fprintf(fnew, "%s", line); // data != tmp => on copie dans fnew
+    } else i++; // data == tmp => on incrémente i
+  }
+  if (i == 0) printf("Evennement non présent\n"); 
+  if (fclose(fold) == EOF) return -1;
+  if (fclose(fnew) == EOF) return -1;
+  rename("data.tmp", "data"); // on renomme le fichier
+  return 0;
 }
 
 //Affiche le planning
@@ -127,6 +160,12 @@ int main(int argc, char** argv) {
   if (res != 0) {
     free(data);
     return res;
+  }
+  // test delete_data(Data* data)
+  int res2 = delete_data(data);
+  if (res2 != 0) {
+    free(data);
+    return res2;
   }
   free(data);
   return 0;
