@@ -146,7 +146,25 @@ int delete_data(Data* data) {
 }
 
 //Affiche le planning
-char* see_all(char* answer) {
+// char* see_all(char* answer) {
+// }
+void print_format(char* l, Data* data) {
+  sprintf(l, "%s %dh: %s a %s\n", 
+    day_to_string(data->day), data->hour,
+    data->name, data->activity);
+}
+int see_all(){
+  FILE* f;
+  char line[LINE_SIZE];
+  Data* data;
+  f = fopen(DATA, "r");
+  if (f == NULL) return -1;
+  while(fgets(line, LINE_SIZE, f)) {
+    data = get_data(line);
+    print_format(line, data);
+    printf("%s", line);
+  }
+  return 0;
 }
 
 int main(int argc, char** argv) {
@@ -167,6 +185,8 @@ int main(int argc, char** argv) {
     free(data);
     return res2;
   }
+  // test see_all()
+  see_all();
   free(data);
   return 0;
 }
